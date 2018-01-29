@@ -19,7 +19,7 @@ class HasherTest extends TestCase
     public function testBasicArgonHashing()
     {
         if (! defined('PASSWORD_ARGON2I')) {
-            $this->markTestSkipped('PHP not compiled with argon2 hashing support support.');
+            $this->markTestSkipped('PHP not compiled with argon2 hashing support.');
         }
 
         $hasher = new \Illuminate\Hashing\ArgonHasher;
@@ -27,6 +27,6 @@ class HasherTest extends TestCase
         $this->assertNotSame('password', $value);
         $this->assertTrue($hasher->check('password', $value));
         $this->assertFalse($hasher->needsRehash($value));
-        $this->assertTrue($hasher->needsRehash($value, ['processors' => 1]));
+        $this->assertTrue($hasher->needsRehash($value, ['threads' => 1]));
     }
 }

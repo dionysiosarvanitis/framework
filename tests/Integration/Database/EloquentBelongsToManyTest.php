@@ -3,31 +3,18 @@
 namespace Illuminate\Tests\Integration\Database\EloquentBelongsToManyTest;
 
 use Illuminate\Support\Carbon;
-use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Tests\Integration\Database\DatabaseTestCase;
 
 /**
  * @group integration
  */
-class EloquentBelongsToManyTest extends TestCase
+class EloquentBelongsToManyTest extends DatabaseTestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $app['config']->set('app.debug', 'true');
-
-        $app['config']->set('database.default', 'testbench');
-
-        $app['config']->set('database.connections.testbench', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
-    }
-
     public function setUp()
     {
         parent::setUp();
@@ -145,6 +132,7 @@ class EloquentBelongsToManyTest extends TestCase
         $post->tagsWithCustomAccessor()->attach($tag->id);
 
         $this->assertInstanceOf(CustomPivot::class, $post->tagsWithCustomPivot[0]->pivot);
+        $this->assertEquals('1507630210', $post->tagsWithCustomPivot[0]->pivot->getAttributes()['created_at']);
 
         $this->assertEquals([
             'post_id' => '1',
@@ -667,4 +655,5 @@ class TagWithCustomPivot extends Model
 
 class CustomPivot extends Pivot
 {
+    protected $dateFormat = 'U';
 }

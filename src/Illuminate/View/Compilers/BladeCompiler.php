@@ -12,6 +12,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
         Concerns\CompilesComponents,
         Concerns\CompilesConditionals,
         Concerns\CompilesEchos,
+        Concerns\CompilesHelpers,
         Concerns\CompilesIncludes,
         Concerns\CompilesInjections,
         Concerns\CompilesJson,
@@ -218,7 +219,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
      */
     protected function storeRawBlock($value)
     {
-        return $this->getRawPlaceHolder(
+        return $this->getRawPlaceholder(
             array_push($this->rawBlocks, $value) - 1
         );
     }
@@ -424,6 +425,28 @@ class BladeCompiler extends Compiler implements CompilerInterface
     }
 
     /**
+     * Register a component alias directive.
+     *
+     * @param  string  $path
+     * @param  string  $alias
+     * @return void
+     */
+    public function component($path, $alias = null)
+    {
+        $alias = $alias ?: array_last(explode('.', $path));
+
+        $this->directive($alias, function ($expression) use ($path) {
+            return $expression
+                        ? "<?php \$__env->startComponent('{$path}', {$expression}); ?>"
+                        : "<?php \$__env->startComponent('{$path}'); ?>";
+        });
+
+        $this->directive('end'.$alias, function ($expression) {
+            return '<?php echo $__env->renderComponent(); ?>';
+        });
+    }
+
+    /**
      * Register a handler for custom directives.
      *
      * @param  string  $name
@@ -454,5 +477,15 @@ class BladeCompiler extends Compiler implements CompilerInterface
     public function setEchoFormat($format)
     {
         $this->echoFormat = $format;
+    }
+
+    /**
+     * Set the echo format to double encode entities.
+     *
+     * @return void
+     */
+    public function doubleEncode()
+    {
+        $this->setEchoFormat('e(%s, true)');
     }
 }

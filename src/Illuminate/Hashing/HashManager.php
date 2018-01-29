@@ -8,7 +8,7 @@ use Illuminate\Contracts\Hashing\Hasher;
 class HashManager extends Manager implements Hasher
 {
     /**
-     * Create an instance of the Brycrypt hash Driver.
+     * Create an instance of the Bcrypt hash Driver.
      *
      * @return BcryptHasher
      */
@@ -25,6 +25,17 @@ class HashManager extends Manager implements Hasher
     public function createArgonDriver()
     {
         return new ArgonHasher;
+    }
+
+    /**
+     * Get information about the given hashed value.
+     *
+     * @param  string  $hashedValue
+     * @return array
+     */
+    public function info($hashedValue)
+    {
+        return $this->driver()->info($hashedValue);
     }
 
     /**

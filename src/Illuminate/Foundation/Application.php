@@ -29,7 +29,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @var string
      */
-    const VERSION = '5.6-dev';
+    const VERSION = '5.7-dev';
 
     /**
      * The base path for the Laravel installation.
@@ -299,7 +299,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the application "app" directory.
      *
-     * @param string $path Optionally, a path to append to the app path
+     * @param  string  $path Optionally, a path to append to the app path
      * @return string
      */
     public function path($path = '')
@@ -310,7 +310,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the base path of the Laravel installation.
      *
-     * @param string $path Optionally, a path to append to the base path
+     * @param  string  $path Optionally, a path to append to the base path
      * @return string
      */
     public function basePath($path = '')
@@ -321,7 +321,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the bootstrap directory.
      *
-     * @param string $path Optionally, a path to append to the bootstrap path
+     * @param  string  $path Optionally, a path to append to the bootstrap path
      * @return string
      */
     public function bootstrapPath($path = '')
@@ -332,7 +332,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the application configuration files.
      *
-     * @param string $path Optionally, a path to append to the config path
+     * @param  string  $path Optionally, a path to append to the config path
      * @return string
      */
     public function configPath($path = '')
@@ -343,7 +343,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the database directory.
      *
-     * @param string $path Optionally, a path to append to the database path
+     * @param  string  $path Optionally, a path to append to the database path
      * @return string
      */
     public function databasePath($path = '')
@@ -621,9 +621,20 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function getProvider($provider)
     {
+        return array_values($this->getProviders($provider))[0] ?? null;
+    }
+
+    /**
+     * Get the registered service provider instances if any exist.
+     *
+     * @param  \Illuminate\Support\ServiceProvider|string  $provider
+     * @return array
+     */
+    public function getProviders($provider)
+    {
         $name = is_string($provider) ? $provider : get_class($provider);
 
-        return Arr::first($this->serviceProviders, function ($value) use ($name) {
+        return Arr::where($this->serviceProviders, function ($value) use ($name) {
             return $value instanceof $name;
         });
     }
@@ -1128,7 +1139,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             'filesystem.cloud'     => [\Illuminate\Contracts\Filesystem\Cloud::class],
             'hash'                 => [\Illuminate\Hashing\HashManager::class],
             'translator'           => [\Illuminate\Translation\Translator::class, \Illuminate\Contracts\Translation\Translator::class],
-            'log'                  => [\Illuminate\Log\Writer::class, \Illuminate\Contracts\Logging\Log::class, \Psr\Log\LoggerInterface::class],
+            'log'                  => [\Illuminate\Log\LogManager::class, \Psr\Log\LoggerInterface::class],
             'mailer'               => [\Illuminate\Mail\Mailer::class, \Illuminate\Contracts\Mail\Mailer::class, \Illuminate\Contracts\Mail\MailQueue::class],
             'auth.password'        => [\Illuminate\Auth\Passwords\PasswordBrokerManager::class, \Illuminate\Contracts\Auth\PasswordBrokerFactory::class],
             'auth.password.broker' => [\Illuminate\Auth\Passwords\PasswordBroker::class, \Illuminate\Contracts\Auth\PasswordBroker::class],

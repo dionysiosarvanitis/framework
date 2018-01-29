@@ -33,7 +33,7 @@ class StatusCommand extends BaseCommand
      * Create a new migration rollback command instance.
      *
      * @param  \Illuminate\Database\Migrations\Migrator $migrator
-     * @return \Illuminate\Database\Console\Migrations\StatusCommand
+     * @return void
      */
     public function __construct(Migrator $migrator)
     {
@@ -105,7 +105,9 @@ class StatusCommand extends BaseCommand
         return [
             ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'],
 
-            ['path', null, InputOption::VALUE_OPTIONAL, 'The path of migrations files to use.'],
+            ['path', null, InputOption::VALUE_OPTIONAL, 'The path to the migrations files to use.'],
+
+            ['realpath', null, InputOption::VALUE_NONE, 'Indicate any provided migration file paths are pre-resolved absolute paths.'],
         ];
     }
 }

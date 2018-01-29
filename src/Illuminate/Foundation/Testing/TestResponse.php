@@ -126,6 +126,21 @@ class TestResponse
     }
 
     /**
+     * Asserts that the response does not contains the given header.
+     *
+     * @param  string  $headerName
+     * @return $this
+     */
+    public function assertHeaderMissing($headerName)
+    {
+        PHPUnit::assertFalse(
+            $this->headers->has($headerName), "Unexpected header [{$headerName}] is present on response."
+        );
+
+        return $this;
+    }
+
+    /**
      * Asserts that the response contains the given cookie and equals the optional value.
      *
      * @param  string  $cookieName
@@ -239,6 +254,32 @@ class TestResponse
     }
 
     /**
+     * Assert that the given strings are contained in order within the response.
+     *
+     * @param  array  $values
+     * @return $this
+     */
+    public function assertSeeInOrder(array $values)
+    {
+        $position = -1;
+
+        foreach ($values as $value) {
+            $valuePosition = mb_strpos($this->getContent(), $value);
+
+            if ($valuePosition === false || $valuePosition < $position) {
+                PHPUnit::fail(
+                    'Failed asserting that \''.$this->getContent().
+                    '\' contains "'.$value.'" in specified order.'
+                );
+            }
+
+            $position = $valuePosition;
+        }
+
+        return $this;
+    }
+
+    /**
      * Assert that the given string is contained within the response text.
      *
      * @param  string  $value
@@ -247,6 +288,32 @@ class TestResponse
     public function assertSeeText($value)
     {
         PHPUnit::assertContains($value, strip_tags($this->getContent()));
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given strings are contained in order within the response text.
+     *
+     * @param  array  $values
+     * @return $this
+     */
+    public function assertSeeTextInOrder(array $values)
+    {
+        $position = -1;
+
+        foreach ($values as $value) {
+            $valuePosition = mb_strpos(strip_tags($this->getContent()), $value);
+
+            if ($valuePosition === false || $valuePosition < $position) {
+                PHPUnit::fail(
+                    'Failed asserting that \''.strip_tags($this->getContent()).
+                    '\' contains "'.$value.'" in specified order.'
+                );
+            }
+
+            $position = $valuePosition;
+        }
 
         return $this;
     }
@@ -454,15 +521,15 @@ class TestResponse
     /**
      * Assert that the response JSON has the expected count of items at the given key.
      *
-     * @param int $count
-     * @param string|null $key
+     * @param  int  $count
+     * @param  string|null  $key
      * @return $this
      */
     public function assertJsonCount(int $count, $key = null)
     {
         if ($key) {
-            PHPUnit::assertCount($count,
-                $this->json()[$key],
+            PHPUnit::assertCount(
+                $count, data_get($this->json(), $key),
                 "Failed to assert that the response count matched the expected {$count}"
             );
 
@@ -480,7 +547,7 @@ class TestResponse
     /**
      * Assert that the response has the given JSON validation errors for the given keys.
      *
-     * @param string|array $keys
+     * @param  string|array  $keys
      * @return $this
      */
     public function assertJsonValidationErrors($keys)
@@ -500,9 +567,10 @@ class TestResponse
     /**
      * Validate and return the decoded response JSON.
      *
-     * @return array
+     * @param  string|null  $key
+     * @return mixed
      */
-    public function decodeResponseJson()
+    public function decodeResponseJson($key = null)
     {
         $decodedResponse = json_decode($this->getContent(), true);
 
@@ -514,17 +582,18 @@ class TestResponse
             }
         }
 
-        return $decodedResponse;
+        return data_get($decodedResponse, $key);
     }
 
     /**
      * Validate and return the decoded response JSON.
      *
-     * @return array
+     * @param  string|null  $key
+     * @return mixed
      */
-    public function json()
+    public function json($key = null)
     {
-        return $this->decodeResponseJson();
+        return $this->decodeResponseJson($key);
     }
 
     /**

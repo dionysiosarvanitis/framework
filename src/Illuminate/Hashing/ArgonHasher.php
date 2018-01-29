@@ -8,25 +8,36 @@ use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 class ArgonHasher implements HasherContract
 {
     /**
-     * Default threads factor.
+     * The default threads factor.
      *
      * @var int
      */
-    protected $processors = 2;
+    protected $threads = 2;
 
     /**
-     * Default memory cost factor.
+     * The default memory cost factor.
      *
      * @var int
      */
     protected $memory = 1024;
 
     /**
-     * Default time cost factor.
+     * The default time cost factor.
      *
      * @var int
      */
     protected $time = 2;
+
+    /**
+     * Get information about the given hashed value.
+     *
+     * @param  string  $hashedValue
+     * @return array
+     */
+    public function info($hashedValue)
+    {
+        return password_get_info($hashedValue);
+    }
 
     /**
      * Hash the given value.
@@ -40,7 +51,7 @@ class ArgonHasher implements HasherContract
         $hash = password_hash($value, PASSWORD_ARGON2I, [
             'memory_cost' => $this->memory($options),
             'time_cost' => $this->time($options),
-            'threads' => $this->processors($options),
+            'threads' => $this->threads($options),
         ]);
 
         if ($hash === false) {
@@ -79,7 +90,7 @@ class ArgonHasher implements HasherContract
         return password_needs_rehash($hashedValue, PASSWORD_ARGON2I, [
             'memory_cost' => $this->memory($options),
             'time_cost' => $this->time($options),
-            'threads' => $this->processors($options),
+            'threads' => $this->threads($options),
         ]);
     }
 
@@ -90,7 +101,7 @@ class ArgonHasher implements HasherContract
      *
      * @return $this;
      */
-    public function setProcessors(int $threads)
+    public function setThreads(int $threads)
     {
         $this->threads = $threads;
 
@@ -128,10 +139,10 @@ class ArgonHasher implements HasherContract
     /**
      * Extract the memory cost value from the options array.
      *
-     * @param $options
+     * @param  array  $options
      * @return int
      */
-    protected function memory($options)
+    protected function memory(array $options)
     {
         return $options['memory'] ?? $this->memory;
     }
@@ -139,10 +150,10 @@ class ArgonHasher implements HasherContract
     /**
      * Extract the time cost value from the options array.
      *
-     * @param $options
+     * @param  array  $options
      * @return int
      */
-    protected function time($options)
+    protected function time(array $options)
     {
         return $options['time'] ?? $this->time;
     }
@@ -150,11 +161,11 @@ class ArgonHasher implements HasherContract
     /**
      * Extract the threads value from the options array.
      *
-     * @param $options
+     * @param  array  $options
      * @return int
      */
-    protected function processors($options)
+    protected function threads(array $options)
     {
-        return $options['processors'] ?? $this->processors;
+        return $options['threads'] ?? $this->threads;
     }
 }
